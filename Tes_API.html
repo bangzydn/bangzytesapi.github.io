@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form dan Tabel Data Barang</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            max-width: 600px;
+            margin: 30px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container input,
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .form-container input:focus,
+        .form-container button:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .form-container input[type="text"] {
+            font-size: 16px;
+        }
+
+        .form-container button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 35%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Style untuk kolom Nama dan Harga */
+        td {
+            font-size: 14px;
+        }
+
+        /* Responsif: sesuaikan tampilan di perangkat mobile */
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+
+            .form-container {
+                width: 90%;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Tambah Data Barang dan Tabel</h2>
+
+    <!-- Form input untuk Nama dan Harga barang -->
+    <div class="form-container">
+        <input type="text" id="nama" placeholder="Nama Barang" required>
+        <input type="text" id="harga" placeholder="Harga Barang" required>
+        <button onclick="submitData()">Tambah Barang</button>
+    </div>
+
+    <!-- Tabel untuk menampilkan data -->
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Harga</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data dari API akan dimuat di sini -->
+        </tbody>
+    </table>
+
+    <script>
+        // Fungsi untuk mengambil data dari API dan menampilkannya di tabel
+        function loadTableData() {
+            fetch('https://api.sheetbest.com/sheets/ba901942-0881-4ce3-9e10-d35493b2363a')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#data-table tbody');
+                    tableBody.innerHTML = ''; // Bersihkan tabel sebelum menambah data baru
+                    
+                    // Menambahkan data ke dalam tabel
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        const nameCell = document.createElement('td');
+                        const priceCell = document.createElement('td');
+                        
+                        nameCell.textContent = item.Nama; // Mengambil nama barang
+                        priceCell.textContent = item.Harga; // Mengambil harga barang
+                        
+                        row.appendChild(nameCell);
+                        row.appendChild(priceCell);
+                        
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        // Fungsi untuk mengirim data baru ke API
+        function submitData() {
+            const nama = document.getElementById('nama').value;
+            const harga = document.getElementById('harga').value;
+
+            // Validasi input
+            if (!nama || !harga) {
+                alert("Nama dan Harga harus diisi!");
+                return;
+            }
+
+            const newItem = { Nama: nama, Harga: harga };
+
+            // Kirim data ke API menggunakan metode POST
+            fetch('https://api.sheetbest.com/sheets/ba901942-0881-4ce3-9e10-d35493b2363a', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newItem),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Data berhasil dikirim:", data);
+                // Setelah berhasil, muat ulang data tabel
+                loadTableData();
+                
+                // Reset form input
+                document.getElementById('nama').value = '';
+                document.getElementById('harga').value = '';
+            })
+            .catch(error => {
+                console.error('Error sending data:', error);
+            });
+        }
+
+        // Muat data tabel saat halaman pertama kali dimuat
+        window.onload = loadTableData;
+    </script>
+
+</body>
+</html>
